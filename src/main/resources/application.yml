@@ -1,4 +1,18 @@
 spring:
+  application:
+    name: TPO_03
+  h2:
+    console:
+      path: /my-h2-console
+  datasource:
+      url: jdbc:h2:file:./tpo03
+      username: misalitvin
+      password: 22032005
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   profiles:
     active: "Origin"
-value: "dictionary.csv"

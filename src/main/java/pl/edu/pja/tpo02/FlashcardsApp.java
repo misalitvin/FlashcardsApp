@@ -10,7 +10,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 public class FlashcardsApp {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Throwable {
         ConfigurableApplicationContext context = SpringApplication.run(FlashcardsApp.class);
         FlashcardsController controller = context.getBean(FlashcardsController.class);
         controller.start();

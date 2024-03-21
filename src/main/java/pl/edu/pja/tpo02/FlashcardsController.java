@@ -1,7 +1,6 @@
 package pl.edu.pja.tpo02;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 
@@ -15,17 +14,12 @@ public class FlashcardsController {
     FileService service;
     Print print;
 
-
-    public FlashcardsController(Print print) {
+@Autowired
+    public FlashcardsController(Print print, FileService service) {
         this.print = print;
-        this.service = new FileService();
+        this.service = service;
     }
-
-    @Autowired
-    public void setFilename(@Value("${value}") String filename) {
-        this.service.setFilename(filename);
-    }
-    public void start(){
+    public void start() throws Throwable {
         boolean exit = false;
         while(!exit) {
             System.out.println("Choose an action you want to perform");
@@ -43,10 +37,10 @@ public class FlashcardsController {
                     addWord();
                     break;
                 case 2:
-                    displayWords(service);
+                    displayWords();
                     break;
                 case 3:
-                    test(service);
+                    test();
                     break;
                 case 4:
                     searchWord();
@@ -78,16 +72,16 @@ public class FlashcardsController {
         System.out.println("Enter the word in Polish");
         String pl;
         pl = scanner.nextLine();
-        service.entryRepository.entries.add(new Entry(eng,ger,pl));
+        service.entryRepository.addEntry(new Entry(eng,ger,pl));
     }
-    public void displayWords(FileService service) {
+    public void displayWords() {
         System.out.println("English German Polish");
-        for(Entry e:service.entryRepository.entries){
-            System.out.println(print.changeWord(e.getWorden())+" "+
+        for(Entry e:service.entryRepository.getList()){
+            System.out.println(e.getId()+" "+print.changeWord(e.getWorden())+" "+
                     print.changeWord(e.getWordg())+" "+print.changeWord(e.getWordpl()));
         }
     }
-    public void test(FileService service) {
+    public void test() {
         Scanner scanner = new Scanner(System.in);
         Entry word = pickRandomWord(service.entryRepository);
         Random random = new Random();
@@ -136,18 +130,18 @@ public class FlashcardsController {
     }
 
     public Entry pickRandomWord(EntryRepository entries) {
-        if (entries.entries.isEmpty()) {
+        if (entries.getList().isEmpty()) {
             throw new IllegalArgumentException("There is no words");
         }
         Random random = new Random();
-        int randomIndex = random.nextInt(entries.entries.size());
-        return entries.entries.get(randomIndex);
+        int randomIndex = random.nextInt(entries.getList().size());
+        return entries.getList().get(randomIndex);
     }
     public void searchWord(){
         System.out.println("Enter the word");
         String word = scanner.nextLine();
         word= scanner.nextLine();
-        for(Entry e:service.entryRepository.entries){
+        for(Entry e:service.entryRepository.getList()){
             if(word.equalsIgnoreCase(e.getWorden())||word.equalsIgnoreCase(e.getWordg())
                     ||word.equalsIgnoreCase(e.getWordpl())){
                 System.out.println(print.changeWord(e.getWorden())+" "+
@@ -161,34 +155,7 @@ public class FlashcardsController {
         lang = scanner.nextLine();
         System.out.println("Choose in which order");
         String order = scanner.nextLine();
-        String[][] words = new String[service.entryRepository.entries.size()][3];
-        int i = 0;
-        for(Entry e:service.entryRepository.entries){
-            words[i][0] = e.getWorden().toLowerCase();
-            words[i][1] = e.getWordg().toLowerCase();
-            words[i][2] = e.getWordpl().toLowerCase();
-            i++;
-        }
-        switch (lang){
-            case "English": {
-                Arrays.sort(words,Comparator.comparing(row -> row[0]));
-                printsorted(order, words);
-                break;
-            }
-            case "German": {
-                Arrays.sort(words,Comparator.comparing(row -> row[1]));
-                printsorted(order, words);
-                break;
-            }
-            case "Polish" : {
-                Arrays.sort(words,Comparator.comparing(row -> row[2]));
-                printsorted(order, words);
-                break;
-            }
-            default:
-                System.out.println("You have entered wrong language");
-        }
-
+        printsorted(order, service.sort(lang));
     }
 
     public void printsorted(String order, String[][] words) {
@@ -206,8 +173,8 @@ public class FlashcardsController {
     }
     public void deleteEntry(){
         System.out.println("English German Polish");
-        int i = 0;
-        for(Entry e:service.entryRepository.entries){
+        int i = 1;
+        for(Entry e:service.entryRepository.getList()){
             System.out.print(i + " ");
             System.out.println(print.changeWord(e.getWorden())+" "+
                     print.changeWord(e.getWordg())+" "+print.changeWord(e.getWordpl()));
@@ -216,41 +183,29 @@ public class FlashcardsController {
         System.out.println("Choose the number of the word to delete");
         int num = scanner.nextInt();
         i=0;
-        for(Entry e:service.entryRepository.entries){
+        for(Entry e:service.entryRepository.getList()){
             if(num==i){
-                service.entryRepository.entries.remove(e);
+                service.entryRepository.deleteById(num);
                 break;
             }
             i++;
         }
     }
-    public void modify() {
+    public void modify() throws Throwable {
         System.out.println("English German Polish");
-        int i = 0;
-        for (Entry e : service.entryRepository.entries) {
-            System.out.print(i + " ");
+        for (Entry e : service.entryRepository.getList()) {
+            System.out.print(e.getId() + " ");
             System.out.println(print.changeWord(e.getWorden()) + " " +
                     print.changeWord(e.getWordg()) + " " + print.changeWord(e.getWordpl()));
-            i++;
         }
         System.out.println("Choose the number of the word to modify");
         int num = scanner.nextInt();
         System.out.println("Choose the language of which is word to modify");
-        String lang = scanner.nextLine();
-        lang = scanner.nextLine();
+        System.out.println("Eng-1, Ger-2, Pl-3");
+        int lang = scanner.nextInt();
         System.out.println("Enter the new word");
         String newword = scanner.nextLine();
-        switch (lang) {
-            case "English":
-                service.entryRepository.entries.get(num).setWorden(newword);
-                break;
-            case "German":
-                service.entryRepository.entries.get(num).setWordg(newword);
-                break;
-            case "Polish":
-                service.entryRepository.entries.get(num).setWordpl(newword);
-                break;
-            default:
-        }
+        newword = scanner.nextLine();
+        service.updateWord(lang,num,newword);
     }
 }
