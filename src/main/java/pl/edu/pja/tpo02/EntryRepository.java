@@ -1,45 +1,41 @@
 package pl.edu.pja.tpo02;
 
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class EntryRepository {
 
-    private final EntityManager entityManager;
-    public EntryRepository(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public final SpringRep springRep;
+    public EntryRepository(SpringRep springRep) {
+        this.springRep = springRep;
     }
     public List<Entry> getList(){
-        return entityManager.createQuery("select entry from Entry entry",Entry.class).getResultList();
+        return (List<Entry>) springRep.findAll();
     }
-    @Transactional
     public void addEntry(Entry entry){
-        entityManager.persist(entry);
-    }
-    @Transactional
-    public Entry findById(int id){
-        return entityManager.find(Entry.class,id);
+        springRep.save(entry);
     }
 
-    @Transactional
     public void deleteById(int id){
-        Optional.ofNullable(entityManager.find(Entry.class, id)).ifPresent(entityManager::remove);
+        springRep.deleteById(id);
     }
 
-    @Transactional
         public void update(int id,String updatedword,int lang)  {
         switch (lang){
-            case 1 : findById(id).setWorden(updatedword);
-                System.out.println(findById(id).toString());
+            case 1 :
+                Entry temp = springRep.findById(id);
+                temp.setWorden(updatedword);
+                springRep.save(temp);
             break;
-            case 2 : findById(id).setWordg(updatedword);
+            case 2 : Entry t = springRep.findById(id);
+                t.setWordg(updatedword);
+                springRep.save(t);
             break;
-            case 3:findById(id).setWordpl(updatedword);
+            case 3: Entry g = springRep.findById(id);
+                g.setWordpl(updatedword);
+                springRep.save(g);
             break;
         }
     }

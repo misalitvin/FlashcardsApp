@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 public class Entry {
     @Id
     @GeneratedValue
-    private int id;
+    private int eid;
     private String worden;
     private String wordg;
     private String wordpl;
@@ -48,12 +48,12 @@ public class Entry {
 
 
     public int getId() {
-        return id;
+        return eid;
     }
     @Override
     public String toString() {
         return "Entry{" +
-                "idOfEntry=" + id +
+                "idOfEntry=" + eid +
                 ", worden='" + worden + '\'' +
                 ", wordg='" + wordg + '\'' +
                 ", wordpl=" + wordpl +

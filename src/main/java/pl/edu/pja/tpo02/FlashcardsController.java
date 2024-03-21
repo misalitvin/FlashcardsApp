@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Controller
-@Service
+
 
 public class FlashcardsController {
     Scanner scanner = new Scanner(System.in);
-    FileService service;
+    private  final  FileService service;
     Print print;
 
 @Autowired
@@ -173,25 +173,16 @@ public class FlashcardsController {
     }
     public void deleteEntry(){
         System.out.println("English German Polish");
-        int i = 1;
         for(Entry e:service.entryRepository.getList()){
-            System.out.print(i + " ");
+            System.out.print(e.getId() + " ");
             System.out.println(print.changeWord(e.getWorden())+" "+
                     print.changeWord(e.getWordg())+" "+print.changeWord(e.getWordpl()));
-            i++;
         }
         System.out.println("Choose the number of the word to delete");
         int num = scanner.nextInt();
-        i=0;
-        for(Entry e:service.entryRepository.getList()){
-            if(num==i){
-                service.entryRepository.deleteById(num);
-                break;
-            }
-            i++;
-        }
+        service.entryRepository.deleteById(num);
     }
-    public void modify() throws Throwable {
+    public void modify() {
         System.out.println("English German Polish");
         for (Entry e : service.entryRepository.getList()) {
             System.out.print(e.getId() + " ");
